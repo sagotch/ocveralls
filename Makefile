@@ -1,7 +1,7 @@
-all: coveralls
+all: ocveralls
 
-coveralls:
-	ocamlbuild -I src -pkg bisect coveralls.native
+ocveralls:
+	ocamlbuild -I src -pkg bisect ocveralls.native
 
 clean:
 	ocamlbuild -clean
