@@ -16,7 +16,7 @@ let source_and_coverage src points  =
            (List.map snd current) in
        let line_cov = if unvisited then "0"
 		      else if visited then string_of_int min_visits
-		      else "0" in
+		      else "null" in
        process remaining (line_src :: src, line_cov :: cov)
     | exception End_of_file -> close_in chan ;
 			       (List.rev src, List.rev cov)
