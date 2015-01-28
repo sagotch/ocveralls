@@ -2,12 +2,20 @@
 
 open Bisect
 
+(** [source_and_coverage "foo.ml" pts] returns
+    the list of lines read in "foo.ml" and the list of coverage
+    metadata for each line ("0", "null", "1", ...) *)
 let source_and_coverage
     : string -> (int * int) list -> string list  * string list
   = fun src points ->
 
   let chan = open_in src in
 
+  (* For a line and some points:
+   * - Split points in two groups: points contained in the line, and the rest.
+   * - Determine if every contained points has been visited and
+   *   attribute a coverage metadata ("0", "null", ...) to the line.
+   * - Restart with next line and reamining points. *)
   let rec process points (src, cov) = match input_line chan with
     | line_src ->
        let end_off = pos_in chan in
@@ -28,12 +36,16 @@ let source_and_coverage
 
 (* FIXME:
  * Assumes that all files contains data about
- * the same set of files. *)
+ * the same set of files.
+ * If the first runtime data file misses a source file,
+ * final data will also miss it.  *)
 let coverage_data
     : string list -> (string * int array) list
   = fun files ->
   if files = [] then []
   else
+    (* Combine all files runtime data:
+     * point coverage is the sum of counters of each file associated to it. *)
     let combine a1 a2 = Array.mapi (fun i v -> v + a2.(i)) a1 in
     let data = List.map Common.read_runtime_data files in
     let hd = List.hd data in
