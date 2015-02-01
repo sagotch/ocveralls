@@ -1,7 +1,7 @@
 all: ocveralls
 
 ocveralls:
-	ocamlbuild -I src -pkg bisect ocveralls.native
+	ocamlbuild -I src -pkg ezjsonm -pkg bisect ocveralls.native
 
 clean:
 	ocamlbuild -clean

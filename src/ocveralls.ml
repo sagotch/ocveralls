@@ -1,6 +1,10 @@
-(* FIXME: Running this tool will generate a bisectX.out in current directory. *)
+(* FIXME: Running this tool will generate a bisectX.out file
+ * in current directory. *)
+(* NOTE: depend on a modified version of [ezjsonm] lib. Waiting for
+   PR to be merged or not. *)
 
-open Bisect
+module B = Bisect.Common
+module J = Ezjsonm
 
 (** [source_and_coverage "foo.ml" pts] returns
     the list of lines read in "foo.ml" and the list of coverage
@@ -12,7 +16,8 @@ let source_and_coverage
   let chan = open_in src in
 
   (* For a line and some points:
-   * - Split points in two groups: points contained in the line, and the rest.
+   * - Split points in two groups:
+   *   points contained in the line, and the rest.
    * - Determine if every contained points has been visited and
    *   attribute a coverage metadata ("0", "null", ...) to the line.
    * - Restart with next line and reamining points. *)
@@ -32,7 +37,7 @@ let source_and_coverage
        process remaining (line_src :: src, line_cov :: cov)
     | exception End_of_file -> close_in chan ;
 			       (List.rev src, List.rev cov)
-    in process points ([], [])
+		in process points ([], [])
 
 (* FIXME:
  * Assumes that all files contains data about
@@ -45,9 +50,10 @@ let coverage_data
   if files = [] then []
   else
     (* Combine all files runtime data:
-     * point coverage is the sum of counters of each file associated to it. *)
+     * point coverage is the sum of counters of
+     * each file associated to it. *)
     let combine a1 a2 = Array.mapi (fun i v -> v + a2.(i)) a1 in
-    let data = List.map Common.read_runtime_data files in
+    let data = List.map B.read_runtime_data files in
     let hd = List.hd data in
     let tl = List.tl data in
     List.map (fun (k, v) ->
@@ -57,15 +63,16 @@ let coverage_data
 
 let _ =
 
-  let prefix = ref "" in
+  let prefix = ref "." in
   let cov_files = ref [] in
 
   let usage = "usage: coveralls [options] coverage*.out" in
 
-  let options = Arg.align [
-		    "--prefix", Arg.Set_string prefix,
-		    " Prefix to add in order to find source and cmp files." ;
-		  ] in
+  let options =
+    Arg.align [
+	"--prefix", Arg.Set_string prefix,
+	" Prefix to add in order to find source and cmp files." ;
+      ] in
 
   Arg.parse options (fun s -> cov_files := s :: !cov_files) usage ;
 
@@ -74,14 +81,20 @@ let _ =
   List.map (fun (src, cov) ->
 	    let len = Array.length cov in
 	    let src' = !prefix ^ "/" ^ src in
-	    let pts = Common.read_points src'
-		      |> List.map ( fun p -> ( p.Common.offset,
-					       if p.Common.identifier < len
-					       then cov.(p.Common.identifier)
-					       else 0 ) ) in
+	    let pts =
+	      B.read_points src'
+	      |> List.map ( fun p -> ( p.B.offset,
+				       if p.B.identifier < len
+				       then cov.(p.B.identifier)
+				       else 0 ) ) in
 	    (src, source_and_coverage src' pts)) coverage_data
-  |> List.iter (fun (src, (_, cov)) ->
-		let null = List.filter ((=) "null") cov |> List.length in
-		let zero = List.filter ((=) "0") cov |> List.length in
-		Printf.printf "%s: %d KO / %d null / %d OK\n"
-			      src zero null (List.length cov - null - zero))
+  |> J.list
+       (fun (fn, (src, cov)) ->
+	[ ("name", J.string fn) ;
+	  ("source", J.string (String.concat "\n" src)) ;
+	  "coverage", J.list
+			(function "null" -> J.unit ()
+				| i -> J.int (int_of_string i)) cov
+	]
+	|> J.dict)
+  |> J.to_channel ~minify:true stdout
