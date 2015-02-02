@@ -26,6 +26,7 @@ let _ =
 
   Arg.parse options (fun s -> cov_files := s :: !cov_files) usage ;
 
+  let prefix = !prefix in
   let repo_token = !repo_token in
   let cov_files = !cov_files in
 
@@ -34,7 +35,7 @@ let _ =
   let source_files =
     List.map (fun (src, cov) ->
 	      let len = Array.length cov in
-	      let src' = !prefix ^ "/" ^ src in
+	      let src' = prefix ^ "/" ^ src in
 	      let pts =
 		B.read_points src'
 		|> List.map ( fun p -> ( p.B.offset,
