@@ -1,7 +1,14 @@
-all: ocveralls
+all: build
 
-ocveralls:
-	ocamlbuild -I src -pkg ezjsonm -pkg bisect ocveralls.native
+build:
+	ocamlbuild -I src -pkgs ezjsonm,bisect ocveralls.native
+
+install: build
+ifndef bindir
+	$(error bindir is not set)
+else
+	cp ocveralls.native $(bindir)/ocvervalls
+endif
 
 clean:
 	ocamlbuild -clean
