@@ -4,7 +4,7 @@ module B = Bisect.Common
     the list of lines read in "foo.ml" and the list of coverage
     metadata for each line ("0", "null", "1", ...) *)
 let source_and_coverage
-    : string -> (int * int) list -> string list  * string list
+    : string -> (int * int) list -> string list  * int list
   = fun src points ->
 
   let chan = open_in src in
@@ -25,9 +25,9 @@ let source_and_coverage
            (fun (m, v, u) nb -> (min m nb, v || nb > 0, u || nb = 0))
            (max_int, false, false)
            (List.map snd current) in
-       let line_cov = if unvisited then "0"
-		      else if visited then string_of_int min_visits
-		      else "null" in
+       let line_cov = if unvisited then 0
+		      else if visited then min_visits
+		      else -1 in
        process remaining (line_src :: src, line_cov :: cov)
     | exception End_of_file -> close_in chan ;
 			       (List.rev src, List.rev cov)

@@ -47,9 +47,8 @@ let _ =
 	 (fun (fn, (src, cov)) ->
 	  [ ("name", J.string fn) ;
 	    ("source", J.string (String.concat "\n" src)) ;
-	    ("coverage", J.list
-			   (function "null" -> J.unit ()
-				   | i -> J.int (int_of_string i)) cov)
+	    ("coverage",
+	     J.list (fun x -> if x = -1 then J.unit else J.int x) cov )
 	  ] |> J.dict)
 
   in
