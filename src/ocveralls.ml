@@ -18,8 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-open OcverallsBisect
-open OcverallsCI
+module B = OcverallsBisect
+module C = OcverallsCI
 module J = OcverallsJSON
 
 let _ =
@@ -45,9 +45,9 @@ let _ =
   let cov_files = !cov_files in
 
   let source_files =
-    coverage_data cov_files
+    B.coverage_data cov_files
     |> List.map (fun (src, cov) ->
-		 (src, source_and_coverage cov (prefix ^ "/" ^ src) ) )
+		 (src, B.source_and_coverage cov (prefix ^ "/" ^ src) ) )
     |> J.list
 	 (fun (fn, (src, cov)) ->
 	  [ ("name", J.string fn) ;
@@ -61,7 +61,7 @@ let _ =
   (if repo_token <> ""
    then [ ("repo_token", J.string repo_token) ;
 	  ("source_files", source_files) ]
-   else let (service_name, service_job_id) = ci_infos () in
+   else let (service_name, service_job_id) = C.ci_infos () in
 	[ ("service_job_id", J.string service_job_id) ;
           ("service_name", J.string service_name) ;
 	  ("source_files", source_files) ])
