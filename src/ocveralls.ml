@@ -18,13 +18,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-(* NOTE: depend on a modified version of [ezjsonm] lib. Waiting for
-   PR to be merged or not. *)
-
 open OcverallsBisect
 open OcverallsCI
-
-module J = Ezjsonm
+module J = OcverallsJSON
 
 let _ =
 
@@ -70,4 +66,4 @@ let _ =
           ("service_name", J.string service_name) ;
 	  ("source_files", source_files) ])
   |> J.dict
-  |> J.to_channel ~minify:true stdout
+  |> J.to_channel stdout
