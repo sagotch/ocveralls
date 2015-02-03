@@ -1,11 +1,21 @@
+(* FIXME: Running this tool will generate a bisectX.out file
+ * in current directory. because of the [at_exit] call in Bisect.Runtime. *)
+
 module B = Bisect.Common
 
-(** [source_and_coverage "foo.ml" pts] returns
+(** [source_and_coverage cov "foo.ml"] returns
     the list of lines read in "foo.ml" and the list of coverage
     metadata for each line ("0", "null", "1", ...) *)
 let source_and_coverage
-    : string -> (int * int) list -> string list  * int list
-  = fun src points ->
+    : int array -> string -> string list  * int list
+  = fun cov src ->
+  let len = Array.length cov in
+  let points =
+    List.map ( fun p -> ( p.B.offset,
+			  if p.B.identifier < len
+			  then cov.(p.B.identifier)
+			  else 0 ) )
+	     (B.read_points src) in
 
   let chan = open_in src in
 

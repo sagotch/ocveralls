@@ -1,5 +1,3 @@
-(* FIXME: Running this tool will generate a bisectX.out file
- * in current directory. *)
 (* NOTE: depend on a modified version of [ezjsonm] lib. Waiting for
    PR to be merged or not. *)
 
@@ -30,19 +28,10 @@ let _ =
   let repo_token = !repo_token in
   let cov_files = !cov_files in
 
-  let coverage_data = coverage_data cov_files in
-
   let source_files =
-    List.map (fun (src, cov) ->
-	      let len = Array.length cov in
-	      let src' = prefix ^ "/" ^ src in
-	      let pts =
-		B.read_points src'
-		|> List.map ( fun p -> ( p.B.offset,
-					 if p.B.identifier < len
-					 then cov.(p.B.identifier)
-					 else 0 ) ) in
-	      (src, source_and_coverage src' pts)) coverage_data
+    coverage_data cov_files
+    |> List.map (fun (src, cov) ->
+		 (src, source_and_coverage cov (prefix ^ "/" ^ src) ) )
     |> J.list
 	 (fun (fn, (src, cov)) ->
 	  [ ("name", J.string fn) ;
