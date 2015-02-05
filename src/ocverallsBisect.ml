@@ -26,8 +26,8 @@ module B = Bisect.Common
 (** [source_and_coverage cov "foo.ml"] returns
     the list of lines read in "foo.ml" and the list of coverage
     metadata for each line ("0", "null", "1", ...) *)
-let source_and_coverage
-    : int array -> string -> string list  * int list
+let coverage
+    : int array -> string -> int list
   = fun cov src ->
   let len = Array.length cov in
   let points =
@@ -45,7 +45,7 @@ let source_and_coverage
    * - Determine if every contained points has been visited and
    *   attribute a coverage metadata ("0", "null", ...) to the line.
    * - Restart with next line and reamining points. *)
-  let rec process points (src, cov) = match input_line chan with
+  let rec process points cov = match input_line chan with
     | line_src ->
        let end_off = pos_in chan in
        let (current, remaining) =
@@ -58,10 +58,10 @@ let source_and_coverage
        let line_cov = if unvisited then 0
 		      else if visited then min_visits
 		      else -1 in
-       process remaining (line_src :: src, line_cov :: cov)
+       process remaining (line_cov :: cov)
     | exception End_of_file -> close_in chan ;
-			       (List.rev src, List.rev cov)
-		in process points ([], [])
+			       List.rev cov
+		in process points []
 
 (** From a file list, read and combine coverage data. *)
 let coverage_data

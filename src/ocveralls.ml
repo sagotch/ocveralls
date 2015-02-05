@@ -47,11 +47,12 @@ let _ =
   let source_files =
     B.coverage_data cov_files
     |> List.map (fun (src, cov) ->
-		 (src, B.source_and_coverage cov (prefix ^ "/" ^ src) ) )
+		 (src, B.coverage cov (prefix ^ "/" ^ src) ) )
     |> J.list
-	 (fun (fn, (src, cov)) ->
-	  [ ("name", J.string fn) ;
-	    ("source", J.string (String.concat "\n" src)) ;
+	 (fun (src, cov) ->
+	  [ ("name", J.string src) ;
+	    ("source_digest",
+	     J.string (Digest.file (prefix ^ "/" ^ src) |> Digest.to_hex)) ;
 	    ("coverage",
 	     J.list (fun x -> if x = -1 then J.unit else J.int x) cov )
 	  ] |> J.dict)
