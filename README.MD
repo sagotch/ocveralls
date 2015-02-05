@@ -1,6 +1,6 @@
 # ocveralls
 
-![travis status](https://travis-ci.org/sagotch/ocveralls.ml.svg?branch=test)
+![travis status](https://travis-ci.org/sagotch/ocveralls.svg?branch=test)
 
 Produce JSON for [coveralls.io](https://coveralls.io/) from
 [bisect](http://bisect.x9c.fr/index.html) coverage data.
@@ -10,6 +10,7 @@ Produce JSON for [coveralls.io](https://coveralls.io/) from
     ocveralls bisect*.out > coveralls.json
 
 Options:
+
     --prefix      Prefix to add in order to find source and cmp files.
     --repo_token  Use repo token instead of automatic CI detection.
 
