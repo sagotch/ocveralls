@@ -63,24 +63,21 @@ let source_and_coverage
 			       (List.rev src, List.rev cov)
 		in process points ([], [])
 
-(* FIXME:
- * Assumes that all files contains data about
- * the same set of files.
- * If the first runtime data file misses a source file,
- * final data will also miss it.  *)
+(** From a file list, read and combine coverage data. *)
 let coverage_data
     : string list -> (string * int array) list
   = fun files ->
-  if files = [] then []
-  else
-    (* Combine all files runtime data:
-     * point coverage is the sum of counters of
-     * each file associated to it. *)
-    let combine a1 a2 = Array.mapi (fun i v -> v + a2.(i)) a1 in
-    let data = List.map B.read_runtime_data files in
-    let hd = List.hd data in
-    let tl = List.tl data in
-    List.map (fun (k, v) ->
-	      (k, try List.map (List.assoc k) tl
-		      |> List.fold_left combine v
-		  with Not_found -> [||])) hd
+  (* Combine all files runtime data:
+   * point coverage is the sum of counters of
+   * each file associated to it. *)
+  let combine a1 a2 = Array.mapi (fun i v -> v + a2.(i)) a1 in
+  let data = List.map B.read_runtime_data files |> List.flatten in
+  (* For each file in data,
+   * Combine information in data abouth this file. *)
+  List.map fst data
+  |> List.sort_uniq compare
+  |> List.map
+       (fun file ->
+	let data = List.find_all (fun (x, _) -> x = file) data
+		   |> List.map snd in
+	(file, List.fold_left combine (List.hd data) (List.tl data)))
