@@ -1,4 +1,5 @@
 opam-version: "1.2"
+ocaml-version: [ >= "4.02.0" ]
 name:         "ocveralls"
 version:      "0.1"
 maintainer:   "Julien Sagot ju.sagot@gmail.com"
