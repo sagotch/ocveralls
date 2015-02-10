@@ -14,7 +14,11 @@ Options:
     --prefix      Prefix to add in order to find source and cmp files.
     --repo_token  Use repo token instead of automatic CI detection.
 
-See also `Makefile` of `test` branch for a complete example.
+An `ocveralls` usage example:
+
+    BISECT_FILE=coverage ./foo.byte
+    ocveralls --prefix _build coverage*.out > coveralls.json
+    curl -F 'json_file=@coveralls.json' 'https://coveralls.io/api/v1/jobs'
 
 ## Installation
 
