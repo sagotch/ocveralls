@@ -1,7 +1,9 @@
 all: build
 
 build:
-	ocamlbuild -I src -pkgs ezjsonm,bisect ocveralls.native
+	ocamlbuild -use-ocamlfind \
+	-I src -pkgs ezjsonm,bisect,unix \
+	ocveralls.native
 
 install: build
 ifndef bindir
