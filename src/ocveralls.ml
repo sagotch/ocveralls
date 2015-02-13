@@ -28,6 +28,7 @@ let _ =
   let repo_token = ref "" in
   let cov_files = ref [] in
   let output = ref "-" in
+  let send = ref false in
 
   let usage = "usage: coveralls [options] coverage*.out" in
 
@@ -39,6 +40,8 @@ let _ =
 	" Prefix to add in order to find source and cmp files." ;
 	"--repo_token", Arg.Set_string repo_token,
 	" Use repo token instead of automatic CI detection." ;
+        "--send", Arg.Set send,
+        " Automatically send data to coveralls.io using curl."
       ] in
 
   Arg.parse options (fun s -> cov_files := s :: !cov_files) usage ;
@@ -47,6 +50,7 @@ let _ =
   let repo_token = !repo_token in
   let cov_files = !cov_files in
   let output = !output in
+  let send = !send in
 
   let source_files =
     B.coverage_data cov_files
@@ -71,4 +75,16 @@ let _ =
           ("service_name", J.string service_name) ;
 	  ("source_files", source_files) ])
   |> J.dict
-  |> J.to_channel (if output = "-" then stdout else open_out output)
+  |> (fun json ->
+
+      if output <> "-"
+      then let oc = open_out output in
+           J.to_channel oc json ;
+           close_out oc
+      else if not send then J.to_channel stdout json ;
+
+      if send
+      then let oc = Unix.open_process_out
+                      "curl -F json_file=@- https://coveralls.io/api/v1/jobs"
+           in J.to_channel oc json ;
+              close_out oc)
