@@ -27,11 +27,14 @@ let _ =
   let prefix = ref "." in
   let repo_token = ref "" in
   let cov_files = ref [] in
+  let output = ref "-" in
 
   let usage = "usage: coveralls [options] coverage*.out" in
 
   let options =
     Arg.align [
+	"--output", Arg.Set_string output,
+	" File where to dump json. Set to - for stdout." ;
 	"--prefix", Arg.Set_string prefix,
 	" Prefix to add in order to find source and cmp files." ;
 	"--repo_token", Arg.Set_string repo_token,
@@ -43,6 +46,7 @@ let _ =
   let prefix = !prefix in
   let repo_token = !repo_token in
   let cov_files = !cov_files in
+  let output = !output in
 
   let source_files =
     B.coverage_data cov_files
@@ -67,4 +71,4 @@ let _ =
           ("service_name", J.string service_name) ;
 	  ("source_files", source_files) ])
   |> J.dict
-  |> J.to_channel stdout
+  |> J.to_channel (if output = "-" then stdout else open_out output)
