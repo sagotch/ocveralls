@@ -11,14 +11,16 @@ Produce JSON for [coveralls.io](https://coveralls.io/) from
 
 Options:
 
+    --output      File where to dump json. Set to - for stdout.
     --prefix      Prefix to add in order to find source and cmp files.
     --repo_token  Use repo token instead of automatic CI detection.
+    --send        Automatically send data to coveralls.io using curl.
+    --version     Print version and exit with 0.
 
 An `ocveralls` usage example:
 
-    BISECT_FILE=coverage ./foo.byte
-    ocveralls --prefix _build coverage*.out > coveralls.json
-    curl -F 'json_file=@coveralls.json' 'https://coveralls.io/api/v1/jobs'
+    BISECT_FILE=_build/coverage ./foo.byte
+    ocveralls --prefix _build _build/coverage*.out --send
 
 ## Installation
 
