@@ -85,6 +85,7 @@ let _ =
 
       if send
       then let oc = Unix.open_process_out
-                      "curl -F json_file=@- https://coveralls.io/api/v1/jobs"
+                      "curl -sLf \
+                       -F json_file=@- https://coveralls.io/api/v1/jobs"
            in J.to_channel oc json ;
-              close_out oc)
+              assert (Unix.close_process_out oc = Unix.WEXITED 0) )
