@@ -24,6 +24,8 @@ module J = OcverallsJSON
 
 let _ =
 
+  let version = "0.2" in
+
   let prefix = ref "." in
   let repo_token = ref "" in
   let cov_files = ref [] in
@@ -41,7 +43,9 @@ let _ =
 	"--repo_token", Arg.Set_string repo_token,
 	" Use repo token instead of automatic CI detection." ;
         "--send", Arg.Set send,
-        " Automatically send data to coveralls.io using curl."
+        " Automatically send data to coveralls.io using curl." ;
+        "--version", Arg.Unit (fun () -> print_endline version ; exit 0),
+        " Print version and exit with 0." ;
       ] in
 
   Arg.parse options (fun s -> cov_files := s :: !cov_files) usage ;
