@@ -71,7 +71,13 @@ let coverage_data
    * point coverage is the sum of counters of
    * each file associated to it. *)
   let combine a1 a2 =
-    Array.mapi (fun i v -> v + (if i < Array.length a2 then a2.(i) else 0)) a1 in
+    (* If [a1] and [a2] have not the same length,
+     * [mapi] on the longest one, and assume [0] for missing
+     * values in the shortest. *)
+    let len1 = Array.length a1 and len2 = Array.length a2 in
+    let long, short, len = if len1 > len2 then a1, a2, len2
+                           else a2, a1, len1  in
+    Array.mapi (fun i v -> v + (if i < len then short.(i) else 0)) long in
   let data = List.map B.read_runtime_data files |> List.flatten in
   (* For each file in data,
    * Combine information in data abouth this file. *)
