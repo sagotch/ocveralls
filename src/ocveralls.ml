@@ -36,12 +36,12 @@ let _ =
 
   let options =
     Arg.align [
-	"--output", Arg.Set_string output,
-	" File where to dump json. Set to - for stdout." ;
-	"--prefix", Arg.Set_string prefix,
-	" Prefix to add in order to find source and cmp files." ;
-	"--repo_token", Arg.Set_string repo_token,
-	" Use repo token instead of automatic CI detection." ;
+        "--output", Arg.Set_string output,
+        " File where to dump json. Set to - for stdout." ;
+        "--prefix", Arg.Set_string prefix,
+        " Prefix to add in order to find source and cmp files." ;
+        "--repo_token", Arg.Set_string repo_token,
+        " Use repo token instead of automatic CI detection." ;
         "--send", Arg.Set send,
         " Automatically send data to coveralls.io using curl." ;
         "--version", Arg.Unit (fun () -> print_endline version ; exit 0),
@@ -59,25 +59,26 @@ let _ =
   let source_files =
     B.coverage_data cov_files
     |> List.map (fun (src, cov) ->
-		 (src, B.coverage cov (prefix ^ "/" ^ src) ) )
+                 (src, B.coverage cov (prefix ^ "/" ^ src) ) )
     |> J.list
-	 (fun (src, cov) ->
-	  [ ("name", J.string src) ;
-	    ("source_digest",
-	     J.string (Digest.file (prefix ^ "/" ^ src) |> Digest.to_hex)) ;
-	    ("coverage",
-	     J.list (fun x -> if x = -1 then J.unit else J.int x) cov )
-	  ] |> J.dict)
+         (fun (src, cov) ->
+          [ ("name", J.string src) ;
+            ("source_digest",
+             J.string (Digest.file (prefix ^ "/" ^ src) |> Digest.to_hex)) ;
+            ("coverage",
+             J.list (fun x -> if x = -1 then J.unit else J.int x) cov )
+          ] |> J.dict)
 
   in
 
   (if repo_token <> ""
    then [ ("repo_token", J.string repo_token) ;
-	  ("source_files", source_files) ]
+   ("source_files", source_files);
+    ]
    else let (service_name, service_job_id) = C.ci_infos () in
-	[ ("service_job_id", J.string service_job_id) ;
+        [ ("service_job_id", J.string service_job_id) ;
           ("service_name", J.string service_name) ;
-	  ("source_files", source_files) ])
+          ("source_files", source_files) ])
   |> J.dict
   |> (fun json ->
 
