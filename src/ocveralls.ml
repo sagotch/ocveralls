@@ -22,6 +22,34 @@ module B = OcverallsBisect
 module C = OcverallsCI
 module J = OcverallsJSON
 
+let get_command_output cmd =
+  let ic = Unix.open_process_in cmd in
+  let line = input_line ic in
+  if Unix.close_process_in ic <> Unix.WEXITED 0 then
+    Printf.kprintf failwith "command: %s did not exit cleanly." cmd
+  else
+    line
+
+let header_cmd = "git log -1 --pretty=format:'id:%H,author_name:%an,\
+author_email:%ae,committer_name:%cn,committer_email:%ce,message:%f'"
+
+let branch_cmd = "git rev-parse --abbrev-ref HEAD"
+
+let ask_git () =
+  let header =
+    let comma = Str.regexp "," in
+    let colon = Str.regexp ":" in
+    get_command_output header_cmd
+    |> Str.split comma
+    |> List.map (fun s ->
+        match Str.split colon s with
+        | [a;b] -> (a, J.string b)
+        | _     -> Printf.kprintf failwith "git command parse failure: %s" s)
+  in
+  let branch = get_command_output branch_cmd in
+  Some (J.dict [ ("head", J.dict header); ("branch", J.string branch);
+                 ("remotes", J.dict [])])
+
 let _ =
 
   let version = "0.2.1" in
@@ -31,6 +59,7 @@ let _ =
   let cov_files = ref [] in
   let output = ref "-" in
   let send = ref false in
+  let git = ref false in
 
   let usage = "usage: coveralls [options] coverage*.out" in
 
@@ -46,6 +75,8 @@ let _ =
         " Automatically send data to coveralls.io using curl." ;
         "--version", Arg.Unit (fun () -> print_endline version ; exit 0),
         " Print version and exit with 0." ;
+        "--git", Arg.Set git,
+        " Ask git for branch and commit messages." ;
       ] in
 
   Arg.parse options (fun s -> cov_files := s :: !cov_files) usage ;
@@ -55,6 +86,7 @@ let _ =
   let cov_files = !cov_files in
   let output = !output in
   let send = !send in
+  let git = if !git then ask_git () else None in
 
   let source_files =
     B.coverage_data cov_files
@@ -73,12 +105,16 @@ let _ =
 
   (if repo_token <> ""
    then [ ("repo_token", J.string repo_token) ;
-   ("source_files", source_files);
-    ]
+          ("source_files", source_files);
+        ]
    else let (service_name, service_job_id) = C.ci_infos () in
         [ ("service_job_id", J.string service_job_id) ;
           ("service_name", J.string service_name) ;
           ("source_files", source_files) ])
+  |> (fun lst ->
+        match git with
+        | None   -> lst
+        | Some d -> ("git", d)::lst)
   |> J.dict
   |> (fun json ->
 
