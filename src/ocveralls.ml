@@ -92,7 +92,7 @@ let _ =
   let cov_files = !cov_files in
   let output = !output in
   let send = !send in
-  let git = if !git then Some (git_data ()) else None in
+  let git = !git in
 
   let source_files =
     B.coverage_data cov_files
@@ -117,10 +117,7 @@ let _ =
         [ ("service_job_id", J.string service_job_id) ;
           ("service_name", J.string service_name) ;
           ("source_files", source_files) ])
-  |> (fun lst ->
-        match git with
-        | None   -> lst
-        | Some d -> ("git", d)::lst)
+  |> (fun x -> if git then ("git", git_data ()) :: x else x)
   |> J.dict
   |> (fun json ->
 
