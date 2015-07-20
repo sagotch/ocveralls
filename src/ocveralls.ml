@@ -22,33 +22,39 @@ module B = OcverallsBisect
 module C = OcverallsCI
 module J = OcverallsJSON
 
-let get_command_output cmd =
-  let ic = Unix.open_process_in cmd in
-  let line = input_line ic in
-  if Unix.close_process_in ic <> Unix.WEXITED 0 then
-    Printf.kprintf failwith "command: %s did not exit cleanly." cmd
-  else
-    line
 
-let header_cmd = "git log -1 --pretty=format:'id:%H,author_name:%an,\
-author_email:%ae,committer_name:%cn,committer_email:%ce,message:%f'"
+let git_data () =
 
-let branch_cmd = "git rev-parse --abbrev-ref HEAD"
+  let output_of cmd =
+    let ic = Unix.open_process_in cmd in
+    let line = input_line ic in
+    if Unix.close_process_in ic <> Unix.WEXITED 0
+    then Printf.ksprintf failwith "command: '%s' did not exit cleanly." cmd
+    else line in
 
-let ask_git () =
   let header =
-    let comma = Str.regexp "," in
-    let colon = Str.regexp ":" in
-    get_command_output header_cmd
-    |> Str.split comma
-    |> List.map (fun s ->
-        match Str.split colon s with
-        | [a;b] -> (a, J.string b)
-        | _     -> Printf.kprintf failwith "git command parse failure: %s" s)
+    output_of "git log -1 --pretty=format:'\
+               id:%H,\
+               author_name:%an,\
+               author_email:%ae,\
+               committer_name:%cn,\
+               committer_email:%ce,\
+               message:%f'"
+    |> Str.split (Str.regexp ",")
+    |> List.map
+         (let colon = Str.regexp ":" in
+          fun s -> match Str.split colon s with
+                   | [a;b] -> (a, J.string b)
+                   | _     -> Printf.ksprintf
+                                failwith
+                                "git command parse failure: '%s'" s)
   in
-  let branch = get_command_output branch_cmd in
-  Some (J.dict [ ("head", J.dict header); ("branch", J.string branch);
-                 ("remotes", J.dict [])])
+
+  let branch = output_of "git rev-parse --abbrev-ref HEAD" in
+
+  J.dict [ ("head", J.dict header) ;
+           ("branch", J.string branch) ;
+           ("remotes", J.dict []) ]
 
 let _ =
 
@@ -86,7 +92,7 @@ let _ =
   let cov_files = !cov_files in
   let output = !output in
   let send = !send in
-  let git = if !git then ask_git () else None in
+  let git = if !git then Some (git_data ()) else None in
 
   let source_files =
     B.coverage_data cov_files
