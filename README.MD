@@ -25,10 +25,12 @@ An `ocveralls` usage example:
 ## Installation
 
 From sources. Set `bindir` to the directory where to install the binary:
+
     make build
 	make bindir=/foo/bar install
 
 Via opam:
+
     opam install ocveralls
 
 ## Know bug(s)
