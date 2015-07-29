@@ -16,21 +16,27 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*)
+ *)
 
 module B = OcverallsBisect
 module C = OcverallsCI
 module J = OcverallsJSON
 
+let debug cmd =
+  let failwith_ = Printf.ksprintf failwith "'%s' %s with %d." cmd in
+  function
+  | Unix.WEXITED 0 -> ()
+  | Unix.WEXITED x -> failwith_ "exited" x
+  | Unix.WSIGNALED x -> failwith_ "signaled" x
+  | Unix.WSTOPPED x  -> failwith_ "stopped" x
 
 let git_data () =
 
   let output_of cmd =
     let ic = Unix.open_process_in cmd in
     let line = input_line ic in
-    if Unix.close_process_in ic <> Unix.WEXITED 0
-    then Printf.ksprintf failwith "command: '%s' did not exit cleanly." cmd
-    else line in
+    debug cmd (Unix.close_process_in ic) ;
+    line in
 
   let header =
     output_of "git log -1 --pretty=format:'\
@@ -128,8 +134,8 @@ let _ =
       else if not send then J.to_channel stdout json ;
 
       if send
-      then let oc = Unix.open_process_out
-                      "curl -sLf \
-                       -F json_file=@- https://coveralls.io/api/v1/jobs"
-           in J.to_channel oc json ;
-              assert (Unix.close_process_out oc = Unix.WEXITED 0) )
+      then let cmd = "curl -sLf -F json_file=@- \
+                      https://coveralls.io/api/v1/jobs" in
+           let oc = Unix.open_process_out cmd in
+           J.to_channel oc json ;
+           debug cmd (Unix.close_process_out oc) )
