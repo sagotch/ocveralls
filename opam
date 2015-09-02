@@ -16,5 +16,5 @@ remove:  [ "rm" "-f" "%{bin}%/ocveralls" ]
 depends: [
   "ocamlfind" { build }
   "ezjsonm" { build & >="0.4.0" }
-  "bisect" { build }
+  ("bisect" | "bisect_ppx" { build })
 ]
