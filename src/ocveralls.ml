@@ -64,7 +64,7 @@ let git_data () =
 
 let _ =
 
-  let version = "0.3.1" in
+  let version = "0.3.2" in
 
   let prefix = ref "." in
   let repo_token = ref "" in
