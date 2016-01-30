@@ -12,7 +12,7 @@ ifndef BISECT
 	$(error No bisect runtime)
 else
 	ocamlbuild -use-ocamlfind \
-		-I src -pkgs ezjsonm,$(BISECT),unix \
+		-I src -pkgs ezjsonm,$(BISECT),unix,str \
 		ocveralls.native
 endif
 
