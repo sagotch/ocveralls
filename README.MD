@@ -3,7 +3,8 @@
 ![travis status](https://travis-ci.org/sagotch/ocveralls.svg?branch=test)
 
 Produce JSON for [coveralls.io](https://coveralls.io/) from
-[bisect](http://bisect.x9c.fr/index.html) coverage data.
+[Bisect_ppx](https://github.com/rleonid/bisect_ppx) coverage data. Also works with
+the original [Bisect](http://bisect.x9c.fr/index.html).
 
 ## Usage
 
