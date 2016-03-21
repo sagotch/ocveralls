@@ -4,7 +4,7 @@ all: build
 ifeq ($(shell ocamlfind query bisect >/dev/null 2>&1 && echo y),y)
 BISECT=bisect
 else ifeq ($(shell ocamlfind query bisect_ppx >/dev/null 2>&1 && echo y),y)
-BISECT=bisect_ppx
+BISECT=bisect_ppx.runtime
 endif
 
 build:
