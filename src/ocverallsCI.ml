@@ -19,9 +19,9 @@
 *)
 
 (* Out-of-the-box supported CI list.
- * First element of a pair is the environement variable to test
+ * First element of a pair is the environment variable to test
  * Second element is the pair composed of the "service_name"
- * and of the environement variable containing "service_job_id" *)
+ * and of the environment variable containing "service_job_id" *)
 let otb_support =
   ["TRAVIS", ("travis-ci", "TRAVIS_JOB_ID");
    "CIRCLECI", ("circleci", "CIRCLE_BUILD_NUM");
