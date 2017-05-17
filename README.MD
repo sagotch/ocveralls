@@ -47,3 +47,11 @@ define `BISECT_SILENT` to `YES` or `ON`).
 On [Travis-ci](https://travis-ci.org/) when installing
 `ocveralls` with opam, you may encouter `ocveralls: command not found`.
 Instead of calling `ocveralls`, use ``"`opam config var bin`/ocveralls"``.
+
+## Supported CI
+
+- travis-ci.org
+- circleci.com
+- semaphoreci.com
+- jenkins.io
+- codeship.com

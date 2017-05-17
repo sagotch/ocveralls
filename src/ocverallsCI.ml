@@ -36,5 +36,7 @@ let ci_infos () =
   let test_env s = try ignore (Sys.getenv s); true
                    with Not_found -> false in
   let (_, (service_name, service_job_id)) =
-    List.find (fun (x, _) -> test_env x) otb_support in
+    try List.find (fun (x, _) -> test_env x) otb_support
+    with Not_found -> failwith "Can not find CI environment variables."
+  in
   (service_name, Sys.getenv service_job_id)
